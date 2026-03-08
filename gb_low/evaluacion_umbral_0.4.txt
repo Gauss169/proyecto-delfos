@@ -1,0 +1,15 @@
+UMBRAL = 0.4
+
+CONFUSION MATRIX
+[[304 409]
+ [125 584]]
+
+CLASSIFICATION REPORT
+              precision    recall  f1-score   support
+
+           0       0.71      0.43      0.53       713
+           1       0.59      0.82      0.69       709
+
+    accuracy                           0.62      1422
+   macro avg       0.65      0.63      0.61      1422
+weighted avg       0.65      0.62      0.61      1422
