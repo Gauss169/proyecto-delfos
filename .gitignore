@@ -1,0 +1,11 @@
+# Entorno virtual
+.venv/
+
+# Archivo de credenciales
+.env
+
+# Archivos compilados de Python
+__pycache__/
+
+# Logs
+*.log

@@ -10,9 +10,13 @@ import pickle
 import sklearn
 
 # Inicializar el cliente con tus credenciales
-api_key = 'cAGsQPkvI5sxkMt1qTJY7ancjALp1EeabYyF8GltqJ8KuOKvgfZH7aKzYHyQc9X8'
-api_secret = 'qkj0jJxLcbzEvpyJvYfww5jzYkv8ExYayhT7mXGbFfeWwT0bnH8VrolE4tNr1WO0'
+from dotenv import load_dotenv
+import os
 
+load_dotenv()  # lee el .env
+
+api_key = os.getenv("BINANCE_API_KEY")
+api_secret = os.getenv("BINANCE_SECRET")
 client = Client(api_key, api_secret)
 
 from binance.client import Client
