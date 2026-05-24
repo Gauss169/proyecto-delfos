@@ -1,0 +1,36 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Archivo de credenciales
+.env
+deployment/.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+pipeline/logs/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Modelos entrenados (opcional - descomentar si no quieres versionar modelos)
+# pipeline/models/*.pkl
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.dockerignore

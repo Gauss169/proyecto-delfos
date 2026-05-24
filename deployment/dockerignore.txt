@@ -1,0 +1,21 @@
+# Renombrar este archivo a .dockerignore en la raíz del proyecto
+
+.git
+.gitignore
+.env
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
+.ipynb_checkpoints
+notebooks/
+scripts/
+*.md
+!deployment/*.md
+.vscode
+.idea
