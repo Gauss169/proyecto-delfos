@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/trading.log', encoding='utf-8'),
+        logging.FileHandler('logs/trading.log'),
         logging.StreamHandler()
     ]
 )
@@ -308,8 +308,8 @@ def main(symbol=None, check_interval=None, target_time=None):
     if target_time is None:
         target_time = TRADING_CONFIG['target_time']
     
-    logger.info(f"[INICIO] Bot de trading iniciado para {symbol}")
-    logger.info(f"[CONFIG] Hora objetivo: {target_time}")
+    logger.info(f"🚀 Iniciando bot de trading para {symbol}")
+    logger.info(f"⏰ Hora objetivo: {target_time}")
     
     global active_timer
 
@@ -338,11 +338,11 @@ def main(symbol=None, check_interval=None, target_time=None):
             cont = new_iter
 
             if trigger:
-                logger.info("[TRIGGER] Trigger activado - Ejecutando predicción")
+                logger.info("⏰ Trigger activado - Ejecutando predicción")
 
                 pred, pred_bool, _, _ = predict(client, symbol)
                 
-                logger.info(f"[PREDICCION] Probabilidad: {pred:.4f} | Decisión: {'COMPRAR' if pred < 0.5 else 'NO COMPRAR'}")
+                logger.info(f"📊 Predicción: {pred:.4f} | Decisión: {'COMPRAR' if pred < 0.5 else 'NO COMPRAR'}")
 
                 if pred < 0.5:
                     if check_sell_execution(symbol, order_id=None):
@@ -361,7 +361,7 @@ def main(symbol=None, check_interval=None, target_time=None):
             if openday:
                 current_price = get_current_price(symbol)
                 if current_price and current_price < openday * TRADING_CONFIG['stop_loss_threshold']:
-                    logger.warning("[STOP-LOSS] Stop loss activado")
+                    logger.warning("⚠️ Stop loss activado")
                     cancel_sell_order(symbol)
                     sell_market_order_retry(symbol)
                     openday = None
@@ -370,7 +370,7 @@ def main(symbol=None, check_interval=None, target_time=None):
             active_timer.start()
 
         except Exception as e:
-            logger.error(f"[ERROR] Error: {e}")
+            logger.error(f"❌ Error: {e}")
             active_timer = threading.Timer(5, shot_time)
             active_timer.start()
 

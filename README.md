@@ -1,8 +1,6 @@
-# 🚀 Delfos Trading Bot - Production Pipeline
+# Delfos Trading Bot - Production Pipeline
 
 Sistema de trading automatizado 24/7 con Machine Learning para criptomonedas.
-
-> **✅ PROYECTO LISTO PARA USAR** - Pipeline completo de producción con gestión segura de credenciales, desarrollo de modelos ML y deployment en múltiples clouds.
 
 ## 📁 Estructura del Proyecto
 
