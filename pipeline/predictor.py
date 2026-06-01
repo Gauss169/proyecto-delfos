@@ -16,32 +16,35 @@ def combinations(l):
 
 
 def create_features(df, rachas=RACHAS):
-    df['high_return'] = df['high'] / df['open']
-    df['low_return'] = df['low'] / df['open']
-    df['close_return'] = df['close'] / df['open']
-    df['volatility'] = df['high_return'] - df['low_return']
+    new_cols = {}
+    
+    new_cols['high_return'] = df['high'] / df['open']
+    new_cols['low_return'] = df['low'] / df['open']
+    new_cols['close_return'] = df['close'] / df['open']
+    new_cols['volatility'] = new_cols['high_return'] - new_cols['low_return']
     
     dinamicas = combinations(rachas)
     
     for r in rachas:
-        df[f'high_mean_{r}'] = df['high_return'].rolling(r).mean()
-        df[f'low_mean_{r}'] = df['low_return'].rolling(r).mean()
-        df[f'close_mean_{r}'] = df['close_return'].rolling(r).mean()
-        df[f'volatility_mean_{r}'] = df['volatility'].rolling(r).mean()
+        new_cols[f'high_mean_{r}'] = new_cols['high_return'].rolling(r).mean()
+        new_cols[f'low_mean_{r}'] = new_cols['low_return'].rolling(r).mean()
+        new_cols[f'close_mean_{r}'] = new_cols['close_return'].rolling(r).mean()
+        new_cols[f'volatility_mean_{r}'] = new_cols['volatility'].rolling(r).mean()
     
     for d in dinamicas:
         a, b = d
-        df[f'high_dinamica_mean_{a}_{b}'] = (df[f'high_mean_{a}'] / df[f'high_mean_{b}']) - 1
-        df[f'volatility_dinamica_mean_{a}_{b}'] = (df[f'volatility_mean_{a}'] / df[f'volatility_mean_{b}']) - 1
-        df[f'low_dinamica_mean_{a}_{b}'] = -((df[f'low_mean_{a}'] / df[f'low_mean_{b}']) - 1)
-        df[f'close_dinamica_mean_{a}_{b}'] = (df[f'close_mean_{a}'] / df[f'close_mean_{b}']) - 1
-        df[f'high_dinamica_mean_{a}_{b}_modified'] = df[f'high_mean_{a}']**2 / df[f'high_mean_{b}']
-        df[f'high_pendiente_{a}_{b}'] = df[f'high_dinamica_mean_{a}_{b}'].diff()
-        df[f'low_pendiente_{a}_{b}'] = df[f'low_dinamica_mean_{a}_{b}'].diff()
-        df[f'close_pendiente_{a}_{b}'] = df[f'close_dinamica_mean_{a}_{b}'].diff()
-        df[f'volatility_pendiente_{a}_{b}'] = df[f'volatility_dinamica_mean_{a}_{b}'].diff()
+        new_cols[f'high_dinamica_mean_{a}_{b}'] = (new_cols[f'high_mean_{a}'] / new_cols[f'high_mean_{b}']) - 1
+        new_cols[f'volatility_dinamica_mean_{a}_{b}'] = (new_cols[f'volatility_mean_{a}'] / new_cols[f'volatility_mean_{b}']) - 1
+        new_cols[f'low_dinamica_mean_{a}_{b}'] = -((new_cols[f'low_mean_{a}'] / new_cols[f'low_mean_{b}']) - 1)
+        new_cols[f'close_dinamica_mean_{a}_{b}'] = (new_cols[f'close_mean_{a}'] / new_cols[f'close_mean_{b}']) - 1
+        new_cols[f'high_dinamica_mean_{a}_{b}_modified'] = new_cols[f'high_mean_{a}']**2 / new_cols[f'high_mean_{b}']
+        new_cols[f'high_pendiente_{a}_{b}'] = new_cols[f'high_dinamica_mean_{a}_{b}'].diff()
+        new_cols[f'low_pendiente_{a}_{b}'] = new_cols[f'low_dinamica_mean_{a}_{b}'].diff()
+        new_cols[f'close_pendiente_{a}_{b}'] = new_cols[f'close_dinamica_mean_{a}_{b}'].diff()
+        new_cols[f'volatility_pendiente_{a}_{b}'] = new_cols[f'volatility_dinamica_mean_{a}_{b}'].diff()
     
-    return df
+    df_new = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
+    return df_new
 
 
 def get_historical_data(client, symbol, period=370, hour=10):
@@ -91,11 +94,14 @@ def get_historical_data(client, symbol, period=370, hour=10):
 
 
 def add_crypto_features(df, symbol):
-    df['cripto_SOL'] = symbol == 'SOLUSDC'
-    df['cripto_BTC'] = symbol == 'BTCUSDC'
-    df['cripto_ETH'] = symbol == 'ETHUSDC'
-    df['cripto_XRP'] = symbol == 'XRPUSDC'
-    return df
+    crypto_cols = {
+        'cripto_SOL': symbol == 'SOLUSDC',
+        'cripto_BTC': symbol == 'BTCUSDC',
+        'cripto_ETH': symbol == 'ETHUSDC',
+        'cripto_XRP': symbol == 'XRPUSDC'
+    }
+    df_new = pd.concat([df, pd.DataFrame(crypto_cols, index=df.index)], axis=1)
+    return df_new
 
 
 def predict(client, symbol):
