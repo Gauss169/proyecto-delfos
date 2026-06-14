@@ -542,8 +542,9 @@ def main():
                 logger.info("⏰ Trigger activado")
 
                 pred, pred_bool = predict(symbol)
-                
+                logger.info(f"La predicción es {pred}")
                 if pred < 0.5:
+                    logger.info("Es una oportunidad de compra")
                     if check_sell_execution(symbol, order_id=None):
                         openday, order = buy_with_full_quote(symbol, fee_margin, timeout)
                         if openday:
@@ -552,6 +553,7 @@ def main():
                         logger.warning("No se ha comprado porque check_sell_execution dio False")
 
                 else:
+                    logger.info("Existe mucho riesgo de compra")
                     if not check_sell_execution(symbol, order_id=None):
                         _, _, success = sell_market_order_retry(symbol)
                         if not success:
