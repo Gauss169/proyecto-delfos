@@ -160,7 +160,7 @@ def create_sell_order(symbol, sell_price):
         qty = float(balance['free'])
 
         if qty <= 0:
-            print(f"No tienes {base_asset} disponible para vender.")
+            logger.info(f"No tienes {base_asset} disponible para vender.")
             return None
 
         # Ajustar cantidad según stepSize y minNotional
@@ -191,14 +191,14 @@ def create_sell_order(symbol, sell_price):
             timeInForce="GTC"
         )
 
-        print(f"✅ Orden de venta creada para {symbol} a {sell_price}:")
-        print(order)
+        logger.info(f"✅ Orden de venta creada para {symbol} a {sell_price}:")
+
         return order
 
     except BinanceAPIException as e:
-        print("❌ Error de API al crear orden de venta:", e)
+        logger.error("❌ Error de API al crear orden de venta:", e)
     except Exception as e:
-        print("❌ Otro error al crear orden de venta:", e)
+        logger.error("❌ Otro error al crear orden de venta:", e)
 
 # 🔹 Función para cancelar orden de venta abierta
 def cancel_sell_order(symbol):
@@ -206,20 +206,19 @@ def cancel_sell_order(symbol):
         # Obtener todas las órdenes abiertas del par
         open_orders = client.get_open_orders(symbol=symbol)
         if not open_orders:
-            print(f"No hay órdenes abiertas para {symbol}.")
+            logger.info(f"No hay órdenes abiertas para {symbol}.")
             return None
 
         # Cancelar la primera orden encontrada
         order_id = open_orders[0]['orderId']
         canceled_order = client.cancel_order(symbol=symbol, orderId=order_id)
-        print(f"✅ Orden cancelada para {symbol}:")
-        print(canceled_order)
+        logger.info(f"✅ Orden cancelada para {symbol}:")
         return canceled_order
 
     except BinanceAPIException as e:
-        print("❌ Error de API al cancelar orden:", e)
+        logger.error("❌ Error de API al cancelar orden:", e)
     except Exception as e:
-        print("❌ Otro error al cancelar orden:", e)
+        logger.error("❌ Otro error al cancelar orden:", e)
 
 def get_binance_time(client, formatted=True):
     """
@@ -269,7 +268,7 @@ def buy_with_full_quote(symbol, fee_margin=0.995, timeout=15):
         free_amount = float(balance['free'])
 
         if free_amount <= 0:
-            print(f"No tienes {quote_asset} disponible.")
+            logger.info(f"No tienes {quote_asset} disponible.")
             return None, None
 
         amount_to_use = round(free_amount * fee_margin, 2)
@@ -284,7 +283,7 @@ def buy_with_full_quote(symbol, fee_margin=0.995, timeout=15):
 
         order_id = order["orderId"]
 
-        print("⏳ Esperando confirmación de ejecución...")
+        logger.info("⏳ Esperando confirmación de ejecución...")
 
         # 🔹 Esperar hasta que esté FILLED
         start_time = time.time()
@@ -311,16 +310,16 @@ def buy_with_full_quote(symbol, fee_margin=0.995, timeout=15):
 
         avg_price = total_quote / total_qty if total_qty > 0 else 0
 
-        print(f"✅ Compra ejecutada completamente en {symbol}")
-        print(f"Precio medio real: {avg_price:.6f}")
+        logger.info(f"✅ Compra ejecutada completamente en {symbol}")
+        logger.info(f"Precio medio real: {avg_price:.6f}")
 
         return avg_price, current_order
 
     except BinanceAPIException as e:
-        print("❌ Error de API:", e)
+        logger.error("❌ Error de API:", e)
         return None, None
     except Exception as e:
-        print("❌ Error:", e)
+        logger.error("❌ Error:", e)
         return None, None
 
 def check_sell_execution(symbol, order_id=None):
@@ -352,7 +351,7 @@ def check_sell_execution(symbol, order_id=None):
         status = order["status"]
 
         if status == "FILLED":
-            print("✅ Orden de venta ejecutada.")
+            logger.info("✅ Orden de venta ejecutada.")
 
             # Calcular precio medio real
             trades = client.get_my_trades(symbol=symbol)
@@ -365,23 +364,23 @@ def check_sell_execution(symbol, order_id=None):
 
             avg_price = total_quote / total_qty if total_qty > 0 else 0
 
-            print(f"Precio medio ejecución: {avg_price:.4f}")
+            logger.info(f"Precio medio ejecución: {avg_price:.4f}")
 
             return True
 
         elif status in ["NEW", "PARTIALLY_FILLED"]:
-            print("⏳ Orden aún no ejecutada completamente.")
+            logger.info("⏳ Orden aún no ejecutada completamente.")
             return False
 
         else:
-            print(f"⚠️ Estado de la orden: {status}")
+            logger.info(f"⚠️ Estado de la orden: {status}")
             return True
 
     except BinanceAPIException as e:
-        print("❌ Error de API:", e)
+        logger.error("❌ Error de API:", e)
         return False
     except Exception as e:
-        print("❌ Otro error:", e)
+        logger.error("❌ Otro error:", e)
         return False
 
 def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
@@ -405,7 +404,7 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
 
     while attempts < max_attempts:
         attempts += 1
-        print(f"🔄 Intento de venta #{attempts}")
+        logger.info(f"🔄 Intento de venta #{attempts}")
 
         try:
             base_asset = symbol[:-4]
@@ -413,7 +412,7 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
             qty = float(balance['free'])
 
             if qty <= 0:
-                print("✅ No queda saldo. Venta completada.")
+                logger.info("✅ No queda saldo. Venta completada.")
                 return None, None, True
 
             symbol_info = client.get_symbol_info(symbol)
@@ -429,7 +428,7 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
             qty_to_sell = np.floor(qty / step_size) * step_size
 
             if qty_to_sell <= 0:
-                print("Cantidad ajustada es 0. Fin.")
+                logger.info("Cantidad ajustada es 0. Fin.")
                 return None, None, True
 
             # 🔹 Ejecutar MARKET
@@ -458,25 +457,25 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
 
             avg_price = total_quote / total_qty if total_qty > 0 else 0
 
-            print(f"✅ Venta ejecutada. Precio medio: {avg_price:.6f}")
+            logger.info(f"✅ Venta ejecutada. Precio medio: {avg_price:.6f}")
 
             # Verificar si aún queda polvo
             balance = client.get_asset_balance(asset=base_asset)
             remaining_qty = float(balance['free'])
 
             if remaining_qty <= step_size:
-                print("🎯 Venta completamente finalizada.")
+                logger.info("🎯 Venta completamente finalizada.")
                 return avg_price, order, True
 
             print("⚠️ Queda saldo pequeño, reintentando...")
 
         except Exception as e:
-            print("❌ Error en intento de venta:", e)
+            logger.error("❌ Error en intento de venta:", e)
 
-        print(f"⏳ Esperando {retry_interval} segundos antes de reintentar...")
+        logger.info(f"⏳ Esperando {retry_interval} segundos antes de reintentar...")
         time.sleep(retry_interval)
 
-    print("❌ Se alcanzó el máximo de intentos.")
+    logger.info("❌ Se alcanzó el máximo de intentos.")
     return None, None, False
 
 def get_current_price(symbol):
@@ -495,10 +494,10 @@ def get_current_price(symbol):
         return price
 
     except BinanceAPIException as e:
-        print("❌ Error de API al obtener precio:", e)
+        logger.error("❌ Error de API al obtener precio:", e)
         return None
     except Exception as e:
-        print("❌ Otro error:", e)
+        logger.error("❌ Otro error:", e)
         return None
 
 def main():
