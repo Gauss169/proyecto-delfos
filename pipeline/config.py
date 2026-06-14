@@ -8,7 +8,7 @@ BINANCE_SECRET = os.getenv("BINANCE_SECRET")
 
 TRADING_CONFIG = {
     'symbol': 'SOLUSDC',
-    'target_time': '20:08',
+    'target_time': '20:23',
     'check_interval': 2,
     'stop_loss_threshold': 0.9,
     'take_profit_threshold': 1.02,
