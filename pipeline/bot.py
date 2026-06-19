@@ -428,7 +428,7 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
             qty_to_sell = np.floor(qty / step_size) * step_size
 
             if qty_to_sell <= 0:
-                logger.info"Cantidad ajustada es 0. Fin.")
+                logger.info("Cantidad ajustada es 0. Fin.")
                 return None, None, True
 
             # 🔹 Ejecutar MARKET
