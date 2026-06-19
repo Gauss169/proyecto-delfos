@@ -428,7 +428,7 @@ def sell_market_order_retry(symbol, retry_interval=15, max_attempts=1000):
             qty_to_sell = np.floor(qty / step_size) * step_size
 
             if qty_to_sell <= 0:
-                logger.info("Cantidad ajustada es 0. Fin.")
+                logger.info"Cantidad ajustada es 0. Fin.")
                 return None, None, True
 
             # 🔹 Ejecutar MARKET
@@ -500,6 +500,32 @@ def get_current_price(symbol):
         logger.error("❌ Otro error:", e)
         return None
 
+def get_open_price(symbol):
+    """
+    Devuelve el precio de apertura (open) del símbolo sin crear ninguna orden.
+    Similar a cómo se calcula openday en buy_with_full_quote pero solo consulta.
+
+    Args:
+        symbol (str): Par de trading, ej. "SOLUSDC"
+
+    Returns:
+        float: Precio de apertura actual o None si hay error
+    """
+    try:
+        # Obtener el precio actual del mercado
+        ticker = client.get_symbol_ticker(symbol=symbol)
+        open_price = float(ticker["price"])
+        
+        logger.info(f"📊 Precio de apertura actual para {symbol}: {open_price}")
+        return open_price
+
+    except BinanceAPIException as e:
+        logger.error(f"❌ Error de API al obtener precio de apertura: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Error al obtener precio de apertura: {e}")
+        return None
+
 def main():
 
     global active_timer
@@ -550,7 +576,11 @@ def main():
                             create_sell_order(symbol, round(openday * take_profit_threshold, 2))
                     else:
                         logger.warning("No se ha comprado porque check_sell_execution dio False")
-
+                        cancel_sell_order(symbol)
+                        logger.info("Se ha cancelado la orden de venta")
+                        openday = get_open_price(symbol)
+                        create_sell_order(symbol, round(openday * take_profit_threshold, 2))
+                        logger.info(f"Se ha creado una nueva orden de venta a {openday * take_profit_threshold}")
                 else:
                     logger.info("Existe mucho riesgo de compra")
                     if not check_sell_execution(symbol, order_id=None):
