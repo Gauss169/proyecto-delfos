@@ -45,7 +45,7 @@ systemctl stop delfos-bot
 ### Verificar que se detuvo:
 
 ```bash
-systemctl status delfos-bot
+
 ```
 
 Deberías ver: **"Active: inactive (dead)"** ⏹️
@@ -66,7 +66,7 @@ Esto detiene y vuelve a iniciar el bot automáticamente.
 
 ## 🔍 Verificar si el Bot Está Funcionando
 
-### Ver estado del servicio:
+### Ver estado del serviciosystemctl status delfos-bot:
 
 ```bash
 systemctl status delfos-bot
